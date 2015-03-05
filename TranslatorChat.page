@@ -1,0 +1,276 @@
+<apex:page showHeader="false"   
+    sidebar="false"
+    standardStylesheets="false"
+    docType="html-5.0"
+    applyHtmlTag="false"
+    controller="TranslatorChatController"
+    action="{!initPushTopic}">
+
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{!$Label.Chat_Page_Title}</title>
+
+        <!-- UI Template -->
+        <!-- Bootstrap Core --> 
+        <apex:stylesheet value="{!URLFOR($Resource.TranslatorUITemplate, '/css/bootstrap.min.css')}"/> 
+
+        <!-- Roboto Font -->
+        <link href="https://fonts.googleapis.com/css?family=Roboto:400,700,300,500" rel="stylesheet" type="text/css" />
+
+        <!-- Admin Core -->
+        <apex:stylesheet value="{!URLFOR($Resource.TranslatorUITemplate, '/css/nifty.min.css')}"/>
+
+        <!-- Demo CSS -->
+        <apex:stylesheet value="{!URLFOR($Resource.TranslatorUITemplate, '/css/demo/nifty-demo.min.css')}"/>
+
+        <!-- Plugins CSS -->
+        <apex:stylesheet value="{!URLFOR($Resource.TranslatorUITemplate, '/css/plugins.min.css')}"/>
+
+        <!--Page load progress bar -->
+        <apex:includeScript value="{!URLFOR($Resource.TranslatorUITemplate, '/js/pace.min.js')}"/>
+        <!-- END UI Template -->
+
+        <!-- bootstrapTour -->
+        <apex:stylesheet value="{!URLFOR($Resource.bootstrapTour, '/build/css/bootstrap-tour.min.css')}"/>  
+
+        <style type="text/css">
+            body {
+                font-size: medium;
+            }
+
+            @media (max-width: 1200px) {
+                .col-xs-12 #recordMessageButton {
+                    margin-top: 10px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="row" style="padding: 50px; margin: 0px">       
+            <div class="row">
+                <div class="col-lg-12" style="margin:10px">
+                    <h1>{!$Label.Chat_Heading_Title}</h1>
+                </div>
+                <div class="col-lg-12" style="margin-left: 20px; margin-bottom: 10px">
+                    <p>{!$Label.Chat_Heading_Message}</p>
+                </div>
+                <div class="col-lg-6">
+                    <div id="languageSection" class="panel">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">{!$Label.Chat_Setup_Title}</h3>
+                        </div>
+                        <div class="panel-body" id="setupBody">
+                            <div class="form-group">
+                                <label class="control-label">{!$Label.Chat_Your_Language_Title}</label>
+                                <select id="myLanguagePicklist" class="form-control selectpicker">
+                                    <option value="es-ES">{!$Label.Language_Spanish}</option>
+                                    <option value="en-GB">{!$Label.Language_English}</option>
+                                    <option value="it-IT">{!$Label.Language_Italian}</option> 
+                                </select>
+                            </div>
+                            <div class="form-group">                        
+                                <label class="control-label">{!$Label.Chat_Friend_Language_Title}</label>
+                                <select id="friendLanguagePicklist" class="form-control selectpicker">
+                                    <option value="es-ES">{!$Label.Language_Spanish}</option>
+                                    <option value="en-GB">{!$Label.Language_English}</option>
+                                    <option value="it-IT">{!$Label.Language_Italian}</option>
+                                </select>
+                            </div>
+                            <br/>
+                            <button id="setLanguageButton" class="btn btn-primary btn-block">{!$Label.Set_Languages_Button}</button>
+                        </div>
+                    </div>        
+                </div>
+                <div class="col-lg-6">
+                    <div id="instructionSection" class="panel">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">{!$Label.Instruction_Title}</h3>
+                        </div>
+                        <div class="panel-body">
+                        <ul>
+                            <li>{!$Label.Instruction1}</li>
+                            <li>{!$Label.Instruction7}</li>
+                            <li>{!$Label.Instruction6}</li>
+                            <li>{!$Label.Instruction3}</li>
+                        </ul>
+                    </div>
+                </div>        
+            </div>
+        </div>        
+        <div class="row">        
+            <div class="col-lg-12">
+                <div class="panel">
+                    <!--Chat widget header-->
+                    <div class="panel-heading" id="chatTitleSection">
+                        <div class="panel-control">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default" data-toggle="dropdown"><i class="fa fa-gear"></i></button>
+                                    <ul class="dropdown-menu dropdown-menu-right">
+                                        <li>
+                                            <a href="#">{!$Label.Chat_Status_Available}</a>
+                                        </li>
+                                        <li>
+                                            <a href="#">{!$Label.Chat_Status_Busy}</a>
+                                        </li>
+                                        <li>
+                                            <a href="#">{!$Label.Chat_Status_Away}</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li>
+                                            <a id="demo-connect-chat" href="#" class="disabled-link" data-target="#demo-chat-body">{!$Label.Chat_Connect_Button}</a>
+                                        </li>
+                                        <li>
+                                            <a id="demo-disconnect-chat" href="#" data-target="#demo-chat-body">{!$Label.Chat_Disconect_Button}</a>
+                                        </li>
+                                    </ul>
+                                    <img src="http://png-3.findicons.com/files/icons/753/gnome_desktop/64/gnome_media_record.png" id="recordingImage" width="20px" height="20px"  style="display: none" />
+                                </div>
+                            </div>
+                            <img src="https://remocc.files.wordpress.com/2014/01/blinking_dot.gif" width="20px" height="20px" style="float: right; margin-top: 21px; display: none;" id="recordingImg"/>
+                            <h3 id="chatTitle" class="panel-title">{!$Label.Chat_Advice_Title}</h3>
+                        </div>
+                        <!--Chat widget body-->
+                        <div id="demo-chat-body" class="collapse in">
+                            <div class="nano has-scrollbar" id="chatTextAreaBody" style="height:380px">
+                                <div class="nano-content pad-all" tabindex="0" style="right: -17px;">
+                                    <ul class="list-unstyled media-block" id="chatBody"></ul>
+                                </div>
+                                <div class="nano-pane">
+                                    <div class="nano-slider" style="height: 135px; transform: translate(0px, 16.6962962962963px);"></div>
+                                </div>
+                            </div>
+
+                            <!--Chat widget footer -->
+                            <div class="panel-footer" id="recordingButtonPanel">
+                                <div class="row">
+                                    <div class="col-xs-12 col-lg-9">
+                                        <input type="text" id="messageInputField" class="form-control chat-input" />
+                                    </div>
+                                    <div class="col-xs-12 col-lg-3">
+                                        <button id="recordMessageButton" class="btn btn-primary btn-block">{!$Label.Record_Message_Button}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    <!-- UI Template -->
+    <!-- jQuery Version 2.1.1 -->
+    <apex:includeScript value="{!URLFOR($Resource.TranslatorUITemplate, '/js/jquery-2.1.1.min.js')}" />
+
+    <!-- Bootstrap Core JavaScript -->
+    <apex:includeScript value="{!URLFOR($Resource.TranslatorUITemplate, '/js/bootstrap.min.js')}"/> 
+
+    <!-- Bootstrap Core && tour -->
+    <script src="{!URLFOR($Resource.bootstrapTour, '/build/js/bootstrap-tour-standalone.min.js')}"></script>
+
+    <!-- Plugins -->
+    <apex:includeScript value="{!URLFOR($Resource.TranslatorUITemplate, '/js/plugins.min.js')}"/>
+
+    <!-- Admin Core -->
+    <apex:includeScript value="{!URLFOR($Resource.TranslatorUITemplate, '/js/nifty.min.js')}"/>
+    <!-- END UI Template -->
+
+    <!-- Streaming API -->
+    <apex:includeScript value="{!URLFOR($Resource.cometd, '/cometd.js')}"/>
+    <apex:includeScript value="{!$Resource.json2}"/>
+    <apex:includeScript value="{!$Resource.jquery_cometd}"/>
+    <!-- END Streaming API -->
+
+    <!-- mustache Template -->
+    <apex:includeScript value="{!$Resource.mustache}"/>
+
+    <script type="text/x-mustache" id="leftMessageTemplate">
+        <li class="mar-btm">
+            <div class="media-left">
+                <img src="{{img}}" class="img-circle img-sm" alt="Profile Picture">
+            </div>
+            <div class="media-body pad-hor">
+                <div class="speech">
+                    <a href="#" class="media-heading">{{username}}</a>
+                    <p>{{body}}</p>
+                    <p class="speech-time">
+                        <i class="fa fa-clock-o fa-fw"></i>{{createdDate}}
+                    </p>
+                </div>
+            </div>
+        </li>
+    </script>
+
+    <script type="text/x-mustache" id="rightMessageTemplate">
+        <li class="mar-btm">
+            <div class="media-right">
+                <img src="{{img}}" class="img-circle img-sm" alt="Profile Picture">
+            </div>
+            <div class="media-body pad-hor speech-right">
+                <div class="speech">
+                    <a href="#" class="media-heading">{{username}}</a>
+                    <p>{{body}}</p>
+                    <p class="speech-time">
+                        <i class="fa fa-clock-o fa-fw"></i>{{createdDate}}
+                    </p>
+                </div>
+            </div>
+        </li>
+    </script>   
+    <!-- END mustache Template -->
+
+    <script src="/translator_chat.js"></script>
+    <script src="/translator_tour.js"></script>
+
+    <script type="text/javascript">
+
+        'use strict';
+
+        window.$Label = window.$Label || {}; 
+        $Label.Error_Sending_Message = '{!$Label.Error_Sending_Message}';
+        $Label.Chat_You = '{!$Label.Chat_You}';
+        $Label.Chat_Friend = '{!$Label.Chat_Friend}';
+        $Label.Error_Service_Down = '{!$Label.Error_Service_Down}';
+        $Label.Send_Message_Button = '{!$Label.Send_Message_Button}';
+        $Label.Set_Languages_Button = '{!$Label.Set_Languages_Button}';
+        $Label.Instruction1 = '{!$Label.Instruction1}';
+        $Label.Instruction4 = '{!$Label.Instruction4}';
+        $Label.Record_Message_Button = '{!$Label.Record_Message_Button}';
+        $Label.Instruction5 = '{!$Label.Instruction5}';
+        $Label.Recording = '{!$Label.Recording}';
+        $Label.Prev_Button = '{!$Label.Prev_Button}';
+        $Label.Next_Button = '{!$Label.Next_Button}';
+        $Label.End_Tour_Button = '{!$Label.End_Tour_Button}';
+
+        var accessToken;
+
+        function refreshAccessToken(){
+            var token = {!accessToken};
+            accessToken = token.access_token;
+        }
+
+        (function($){
+            refreshAccessToken();
+            // translation access token needs to be refreshed
+            setTimeout(function(){ refreshAccessToken(); }, 180000);
+                $(document).ready(function() {
+                    var translatorChat = new TranslatorChat();
+                    translatorChat.init({
+                    sessionID: '{!$Api.Session_ID}',
+                    pushTopicName: '{!pushTopicName}',
+                    userId: '{!$User.Id}',
+                    leftHandsideChatImg: '{!URLFOR($Resource.TranslatorUITemplate, "images/av1.png")}',
+                    rightHandsideChatImg: '{!URLFOR($Resource.TranslatorUITemplate, "images/av4.png")}',
+                    createMessageButtonId: 'recordMessageButton',
+                    messageInputFieldId: 'messageInputField',
+                    languageButtonId: 'setLanguageButton',
+                    friendLanguagePicklistId: 'friendLanguagePicklist',
+                    myLanguagePicklistId: 'myLanguagePicklist',
+                    recordingImgId: 'recordingImg'
+                });
+            });
+        })(jQuery)
+    </script>
+
+</apex:page>
